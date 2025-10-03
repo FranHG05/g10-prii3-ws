@@ -4,7 +4,7 @@
   <name>g10_prii3_turtlesim</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="marolc@todo.todo">marolc</maintainer>
+  <maintainer email="molccom@epsa.upv.es">marolc</maintainer>
   <license>TODO: License declaration</license>
 
   <test_depend>ament_copyright</test_depend>
