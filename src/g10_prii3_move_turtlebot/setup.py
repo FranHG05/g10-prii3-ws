@@ -25,6 +25,8 @@ setup(
     entry_points={
         'console_scripts': [
             'draw_number = g10_prii3_move_turtlebot.draw_number:main',
+            'collision_avoidance = g10_prii3_move_turtlebot.collision_avoidance:main',
+            'obstacle_avoidance = g10_prii3_move_turtlebot.obstacle_avoidance:main',
         ],
     },
 )

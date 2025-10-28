@@ -2,108 +2,114 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import LaserScan
 from std_srvs.srv import Empty
-import threading
 import time
 import math
+import threading
 
-class JetBotDrawer(Node):
+class JetbotNumber(Node):
     def __init__(self):
-        super().__init__('draw_number_jetbot')
+        super().__init__('draw_number_node_jetbot')
+        # Asumimos que el Jetbot escucha en /cmd_vel. Si no, cambia este topic.
         self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
+        
+        # Este supervisor publicará en /draw_vel, así que creamos un publicador
+        # que el 'collision_avoidance' del Jetbot pueda escuchar.
+        self.draw_pub = self.create_publisher(Twist, '/draw_vel', 10)
+        
         self.vel = Twist()
         self.paused = False
         self.stop_flag = False
-        self.obstacle = False
 
-        # Servicios para control manual
+        # Servicios
         self.create_service(Empty, 'pause', self.pause_callback)
         self.create_service(Empty, 'resume', self.resume_callback)
         self.create_service(Empty, 'reset', self.reset_callback)
-        self.get_logger().info("Servicios disponibles: /pause, /resume, /reset")
+        
+        self.get_logger().info("Nodo de dibujo (Jetbot) v1 (Basado en Tiempo) listo.")
 
-        # Suscripción LIDAR
-        self.create_subscription(LaserScan, '/scan', self.lidar_callback, 10)
-
-    # --- Servicios ---
     def pause_callback(self, request, response):
         self.paused = True
-        self.get_logger().info("⏸️ Simulación pausada (manual)")
+        self.get_logger().info("⏸️  Dibujo pausado.")
         return response
 
     def resume_callback(self, request, response):
         self.paused = False
-        self.get_logger().info("▶️ Simulación reanudada (manual)")
+        self.get_logger().info("▶️  Dibujo reanudado.")
         return response
 
     def reset_callback(self, request, response):
         self.stop_flag = True
         self.paused = False
-        self.get_logger().info("🔄 Reiniciando dibujo")
+        self.get_logger().info("🔄  Reiniciando dibujo.")
         return response
 
-    # --- Callback LIDAR ---
-    def lidar_callback(self, msg: LaserScan):
-        front_angles = range(-10, 11)
-        front_distances = []
-        for i in front_angles:
-            index = (i - int(math.degrees(msg.angle_min))) % len(msg.ranges)
-            front_distances.append(msg.ranges[index])
-        self.obstacle = any(d < 0.3 for d in front_distances if d > 0)
-
-    # --- Movimiento básico ---
     def stop(self):
         self.vel.linear.x = 0.0
         self.vel.angular.z = 0.0
-        self.pub.publish(self.vel)
+        self.draw_pub.publish(self.vel) # Publica la intención de parar
 
     def forward(self, duration, speed=0.15):
         elapsed = 0.0
         dt = 0.05
+        
+        # ⚠️ AVISO: Es probable que tengas que ajustar 'speed' (p.ej., a 0.05)
+        # o 'duration' para el robot real. Es más lento que el simulador.
+        
         while elapsed < duration and rclpy.ok():
-            if self.stop_flag:
-                break
-            if not self.paused and not self.obstacle:
-                self.vel.linear.x = speed
-                self.vel.angular.z = 0.0
-                elapsed += dt
-            else:
+            if self.stop_flag: break
+            
+            if self.paused:
                 self.stop()
-            self.pub.publish(self.vel)
+                time.sleep(dt)
+                continue
+            
+            self.vel.linear.x = speed
+            self.vel.angular.z = 0.0
+            self.draw_pub.publish(self.vel)
+            elapsed += dt
             time.sleep(dt)
+            
         self.stop()
 
-    def turn(self, angle_deg, angular_speed=0.5):
+    def turn(self, angle_deg, angular_speed=0.4):
+        # ⚠️ AVISO: Probablemente necesites ajustar 'angular_speed'
+        
         angle_rad = math.radians(angle_deg)
         duration = abs(angle_rad) / angular_speed
         direction = 1 if angle_rad > 0 else -1
+        
         elapsed = 0.0
         dt = 0.05
+        
         while elapsed < duration and rclpy.ok():
-            if self.stop_flag:
-                break
-            if not self.paused and not self.obstacle:
-                self.vel.linear.x = 0.0
-                self.vel.angular.z = direction * angular_speed
-                elapsed += dt
-            else:
+            if self.stop_flag: break
+
+            if self.paused:
                 self.stop()
-            self.pub.publish(self.vel)
+                time.sleep(dt)
+                continue
+            
+            self.vel.linear.x = 0.0
+            self.vel.angular.z = direction * angular_speed
+            self.draw_pub.publish(self.vel)
+            elapsed += dt
             time.sleep(dt)
+
         self.stop()
 
-    # --- Dibujo del número 10 ---
     def draw_number(self):
+        # ⚠️ ¡Valores para calibrar!
+        # Empieza con valores pequeños (p.ej., 2.0 segundos) y ve subiendo.
         steps = [
-            (self.forward, 3.0),
+            (self.forward, 3.0),  # Dibuja el '1'
             (self.turn, 90),
-            (self.forward, 1.0),
+            (self.forward, 0.5),
             (self.turn, 90),
             (self.forward, 3.0),
-            (self.turn, -90),
+            (self.turn, -90),     # Se mueve para empezar el '0'
             (self.forward, 1.5),
-            (self.turn, -90),
+            (self.turn, -90),     # Dibuja el '0'
             (self.forward, 3.0),
             (self.turn, -90),
             (self.forward, 1.5),
@@ -119,16 +125,16 @@ class JetBotDrawer(Node):
                     step_index = 0
                     continue
                 step_index += 1
-            # Esperar hasta que se use /reset
+            
             while not self.stop_flag and rclpy.ok():
                 time.sleep(0.1)
 
 def main(args=None):
     rclpy.init(args=args)
-    node = JetBotDrawer()
+    node = JetbotNumber()
     thread = threading.Thread(target=node.draw_number, daemon=True)
     thread.start()
-
+    
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

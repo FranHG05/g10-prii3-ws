@@ -2,7 +2,6 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import LaserScan
 from std_srvs.srv import Empty
 import time
 import math
@@ -10,31 +9,30 @@ import threading
 
 class TurtleNumber(Node):
     def __init__(self):
-        super().__init__('turtle_number')
-        self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
+        super().__init__('draw_number_node')
+        # Publica en /draw_vel
+        self.pub = self.create_publisher(Twist, '/draw_vel', 10)
         self.vel = Twist()
-        self.paused = False       # Pausa manual
-        self.stop_flag = False    # Reinicio
-        self.obstacle = False     # Obstáculo detectado
+        self.paused = False
+        self.stop_flag = False
 
         # Servicios
         self.create_service(Empty, 'pause', self.pause_callback)
         self.create_service(Empty, 'resume', self.resume_callback)
         self.create_service(Empty, 'reset', self.reset_callback)
-        self.get_logger().info("Servicios disponibles: /pause, /resume, /reset")
-
-        # Suscripción al LIDAR
-        self.create_subscription(LaserScan, '/scan', self.lidar_callback, 10)
+        
+        self.get_logger().info("Nodo de dibujo (draw_number) v1 (Basado en Tiempo) listo.")
+        self.get_logger().info("Publicando intenciones en /draw_vel")
 
     # --- Callbacks de servicios ---
     def pause_callback(self, request, response):
         self.paused = True
-        self.get_logger().info("⏸️  Simulación pausada (manual).")
+        self.get_logger().info("⏸️  Dibujo pausado.")
         return response
 
     def resume_callback(self, request, response):
         self.paused = False
-        self.get_logger().info("▶️  Simulación reanudada (manual).")
+        self.get_logger().info("▶️  Dibujo reanudado.")
         return response
 
     def reset_callback(self, request, response):
@@ -42,17 +40,6 @@ class TurtleNumber(Node):
         self.paused = False
         self.get_logger().info("🔄  Reiniciando dibujo.")
         return response
-
-    # --- Callback del LIDAR ---
-    def lidar_callback(self, msg: LaserScan):
-        # Detectar obstáculos frente al robot
-        front_angles = range(-10, 11)  # grados frontales
-        front_distances = []
-        for i in front_angles:
-            index = (i - int(math.degrees(msg.angle_min))) % len(msg.ranges)
-            front_distances.append(msg.ranges[index])
-        # Objeto a menos de 0.3 metros
-        self.obstacle = any(d < 0.3 for d in front_distances if d > 0)
 
     # --- Movimiento ---
     def stop(self):
@@ -63,54 +50,68 @@ class TurtleNumber(Node):
     def forward(self, duration, speed=0.15):
         elapsed = 0.0
         dt = 0.05
+        
         while elapsed < duration and rclpy.ok():
             if self.stop_flag:
                 break
-            if not self.paused and not self.obstacle:
-                self.vel.linear.x = speed
-                self.vel.angular.z = 0.0
-                elapsed += dt
-            else:
-                self.vel.linear.x = 0.0
-                self.vel.angular.z = 0.0
+            
+            if self.paused:
+                self.stop() # Publica 0.0
+                time.sleep(dt)
+                continue # Se salta el resto del bucle y no suma tiempo
+            
+            # Si no está pausado, se mueve
+            self.vel.linear.x = speed
+            self.vel.angular.z = 0.0
             self.pub.publish(self.vel)
+            
+            elapsed += dt
             time.sleep(dt)
+            
         self.stop()
 
-    def turn(self, angle_deg, angular_speed=0.5):
+    def turn(self, angle_deg, angular_speed=0.4):
         angle_rad = math.radians(angle_deg)
         duration = abs(angle_rad) / angular_speed
         direction = 1 if angle_rad > 0 else -1
+        
         elapsed = 0.0
         dt = 0.05
+        
         while elapsed < duration and rclpy.ok():
             if self.stop_flag:
                 break
-            if not self.paused and not self.obstacle:
-                self.vel.linear.x = 0.0
-                self.vel.angular.z = direction * angular_speed
-                elapsed += dt
-            else:
-                self.vel.linear.x = 0.0
-                self.vel.angular.z = 0.0
+
+            if self.paused:
+                self.stop() # Publica 0.0
+                time.sleep(dt)
+                continue # Se salta el resto del bucle y no suma tiempo
+            
+            # Si no está pausado, gira
+            self.vel.linear.x = 0.0
+            self.vel.angular.z = direction * angular_speed
             self.pub.publish(self.vel)
+            
+            elapsed += dt
             time.sleep(dt)
+
         self.stop()
 
-    # --- Dibujo del número 10 ---
+    # --- Dibujo del número 10 (Basado en Tiempo) ---
     def draw_number(self):
+        # Ajusta estas duraciones (en segundos)
         steps = [
-            (self.forward, 3.0),
+            (self.forward, 5.0),  # Dibuja el '1' (largo)
             (self.turn, 90),
             (self.forward, 1.0),
             (self.turn, 90),
-            (self.forward, 3.0),
+            (self.forward, 5.0),
+            (self.turn, -90),     # Se mueve para empezar el '0'
+            (self.forward, 2.5),
+            (self.turn, -90),     # Dibuja el '0'
+            (self.forward, 5.0),
             (self.turn, -90),
-            (self.forward, 1.5),
-            (self.turn, -90),
-            (self.forward, 3.0),
-            (self.turn, -90),
-            (self.forward, 1.5),
+            (self.forward, 2.5),
         ]
 
         while rclpy.ok():
@@ -123,6 +124,7 @@ class TurtleNumber(Node):
                     step_index = 0
                     continue
                 step_index += 1
+            
             while not self.stop_flag and rclpy.ok():
                 time.sleep(0.1)
 
@@ -131,6 +133,7 @@ def main(args=None):
     node = TurtleNumber()
     thread = threading.Thread(target=node.draw_number, daemon=True)
     thread.start()
+    
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
