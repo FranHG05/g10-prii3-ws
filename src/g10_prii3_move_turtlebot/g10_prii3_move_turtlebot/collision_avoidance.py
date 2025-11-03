@@ -54,20 +54,20 @@ class CollisionAvoider(Node):
             self.cmd_pub.publish(self.last_draw_vel)
 
     def scan_callback(self, msg: LaserScan):
-        # Lógica de detección (rango de -15 a 15 grados)
-        front_angles = range(-15, 16)
+        # Detectar objetos estrictamente en el frente (-10 a +10 grados)
+        front_angles = range(-10, 11)  # Ajustado para un rango más estrecho
         front_distances = []
         for i in front_angles:
-            index = i % 360 # Maneja ángulos (0-359)
+            index = i % 360  # Maneja ángulos (0-359)
             dist = msg.ranges[index]
             if not math.isinf(dist) and not math.isnan(dist) and dist > 0.01:
                 front_distances.append(dist)
 
         if not front_distances:
-            current_obstacle_state = False
+            self.obstacle_detected = False
         else:
             min_dist = min(front_distances)
-            current_obstacle_state = (min_dist < 0.35) # True si hay obstáculo a 35cm
+            self.obstacle_detected = (min_dist < self.avoid_threshold)  # True si hay obstáculo cerca
 
         # --- Lógica de Pausa/Resume ---
         if current_obstacle_state and not self.obstacle_paused_drawing:
@@ -84,7 +84,7 @@ class CollisionAvoider(Node):
         self.obstacle_detected = current_obstacle_state
 
         if self.obstacle_detected:
-             self.cmd_pub.publish(self.stop_vel)
+            self.cmd_pub.publish(self.stop_vel)
 
 def main(args=None):
     rclpy.init(args=args)
