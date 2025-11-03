@@ -1,22 +1,22 @@
-<h2>Sprint 2 — Control del JetBot mediante Gazebo</h2>
-<h3>1) Clonar el repositorio</h3>
+<h2>Sprint 2 — Simulación con Gazebo</h2>
+<h3>1) Clonar el repositorio (Terminal 1)</h3>
 
 ```bash
 git clone https://github.com/FranHG05/g10-prii3-ws.git
 ```
 
-<h3>2) Compilar el workspace</h3>
+<h3>2) Compilar el workspace y cargar el entorno (Terminal 1)</h3>
 
 ```bash
 cd ~/g10-prii3-ws
 
-colcon build
+colcon build --packages-select g10_prii3_move_turtlebot
 
 source install/setup.bash  
 ```
 
 
-<h3>3) Lanzar Gazebo (Terminal 1)</h3>
+<h3>3) Lanzar Gazebo (Terminal 2)</h3>
 
 Configurar modelo TurtleBot3
 
@@ -29,17 +29,19 @@ Lanzar mundo vacío en Gazebo
 ros2 launch turtlebot3_gazebo empty_world.launch.py
 ```
 
-<h3>4) Lanzar el nodo que dibuja el 10 (Terminal 2) </h3>
+<h3>4.1) Lanzar el launch que dibuja el 10 y para antes de chocar (Terminal 1) </h3>
 
 ```bash
-cd ~/g10-prii3-ws
-source install/setup.bash
 ros2 launch g10_prii3_move_turtlebot draw_turtlebot.launch.py
 ```
 
-<h3>5) Controlar la ejecución desde otra terminal SSH (Terminal 3)</h3>
+<h3>4.2) Lanzar el launch que dibuja el 10 y esquiva (Terminal 1) </h3>
 
-Ejecutar los siguientes comandos:
+```bash
+ros2 launch g10_prii3_move_turtlebot obstacle_avoidance.launch.py
+```
+
+<h3>5) Controlar la ejecución (Terminal 3) </h3>
 
 <h4>Pausar el movimiento</h4>
 
@@ -59,25 +61,8 @@ ros2 service call /reset std_srvs/srv/Empty
 ```
 
 
-
-<h2>Sprint 2 — Control del JetBot mediante ROS2</h2>
-<h3>1) Clonar el repositorio</h3>
-
-```bash
-git clone https://github.com/FranHG05/g10-prii3-ws.git
-```
-
-<h3>2) Compilar el workspace</h3>
-
-```bash
-cd ~/g10-prii3-ws
-
-colcon build
-```
-
-<h3>3) Preparar el entorno en 3 terminales</h3>
-
-Abrir terminal y conectarse al JetBot usando su IP:
+<h2>Sprint 2 — Movimiento del JetBot</h2>
+<h3>1) Conectarse al JetBot con su IP (Terminal 1, 2 y 3)</h3>
 
 ```bash
 ssh -X jetbot@172.16.190.154
@@ -88,27 +73,43 @@ El usuario y contraseña son:
 Usuario: jetbot
 Contraseña: jetbot
 ```
-Cargar el entorno:
+
+<h3>2) Clonar el repositorio (Terminal 1)</h3>
+
 ```bash
-source install/setup.bash
+git clone https://github.com/FranHG05/g10-prii3-ws.git
 ```
 
-<h3>4) Iniciar el driver del JetBot (Terminal 1)</h3>
+<h3>3) Compilar el workspace y cargar el entorno (Terminal 1)</h3>
 
-Este nodo es el que permite mover físicamente los motores del JetBot y recibir datos de sus sensores.
+```bash
+cd ~/g10-prii3-ws
+
+colcon build --packages-select g10_prii3_move_jetbot
+
+source install/setup.bash  
+```
+
+<h3>4) Iniciar el driver del JetBot (Terminal 2)</h3>
+
+Este nodo es el que permite mover físicamente los motores del JetBot y recibir datos del LiDAR.
 ```bash
 ros2 run jetbot_pro_ros2 jetbot
 ```
 
-<h3>5) Ejecutar el nodo principal del JetBot (Terminal 2) </h3>
+<h3>5.1) Lanzar el launch que dibuja el 10 y para antes de chocar (Terminal 1) </h3>
 
 ```bash
-ros2 launch g10_prii3_move_jetbot draw_jetbot.launch.py
+ros2 launch g10_prii3_move_turtlebot draw_turtlebot.launch.py
 ```
 
-<h3>6) Controlar la ejecución desde otra terminal SSH (Terminal 3)</h3>
+<h3>5.2) Lanzar el launch que dibuja el 10 y esquiva (Terminal 1) </h3>
 
-Ejecutar los siguientes comandos:
+```bash
+ros2 launch g10_prii3_move_turtlebot obstacle_avoidance.launch.py
+```
+
+<h3>6) Controlar la ejecución (Terminal 3)</h3>
 
 <h4>Pausar el movimiento</h4>
 
@@ -126,31 +127,6 @@ ros2 service call /resume std_srvs/srv/Empty
 ```bash
 ros2 service call /reset std_srvs/srv/Empty
 ```
-
-
-<h3>Estructura del proyecto</h3>
-
-
-```bash
-g10-prii3-ws/
-├── README.md
-└── src/
-    ├── g10_prii3_move_jetbot/
-    │   ├── g10_prii3_move_jetbot/
-    │   │   ├── draw_number.py
-    │   │   └── __init__.py
-    │   ├── launch/
-    │   │   └── draw_jetbot.launch.py
-    │   ├── package.xml
-    │   ├── resource/
-    │   │   └── g10_prii3_move_jetbot
-    │   ├── setup.py
-    │   └── test/
-    ├── g10_prii3_move_turtlebot/
-    └── g10_prii3_turtlesim/
-
-```
-
 
 
 ### Sprint 1
