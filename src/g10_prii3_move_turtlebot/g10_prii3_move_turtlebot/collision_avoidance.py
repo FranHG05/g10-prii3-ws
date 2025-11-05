@@ -33,18 +33,20 @@ class CollisionAvoider(Node):
         
         self.get_logger().info('Clientes de servicio /pause y /resume listos.')
 
+        # --- Variables internas ---
         self.obstacle_detected = False
         self.obstacle_paused_drawing = False
         self.last_draw_vel = Twist()
         self.stop_vel = Twist()
         self.stop_vel.linear.x = 0.0
         self.stop_vel.angular.z = 0.0
+        self.avoid_threshold = 0.35  # ← Añadido: distancia mínima de detección
 
         self.get_logger().info("Nodo 'collision_avoidance' listo.")
 
     def call_service(self, client):
         if not client.service_is_ready():
-            self.get_logger().error(f"Servicio {client.srv_name} no está listo.")
+            self.get_logger().error(f"Servicio no disponible.")
             return
         client.call_async(Empty.Request())
 
@@ -54,20 +56,21 @@ class CollisionAvoider(Node):
             self.cmd_pub.publish(self.last_draw_vel)
 
     def scan_callback(self, msg: LaserScan):
-        # Detectar objetos estrictamente en el frente (-10 a +10 grados)
-        front_angles = range(-10, 11)  # Ajustado para un rango más estrecho
+        # Detectar objetos en el frente (-10 a +10 grados)
+        front_angles = range(-10, 11)
         front_distances = []
         for i in front_angles:
-            index = i % 360  # Maneja ángulos (0-359)
+            index = i % 360
             dist = msg.ranges[index]
             if not math.isinf(dist) and not math.isnan(dist) and dist > 0.01:
                 front_distances.append(dist)
 
+        # Calcular si hay obstáculo
         if not front_distances:
-            self.obstacle_detected = False
+            current_obstacle_state = False
         else:
             min_dist = min(front_distances)
-            self.obstacle_detected = (min_dist < self.avoid_threshold)  # True si hay obstáculo cerca
+            current_obstacle_state = (min_dist < self.avoid_threshold)
 
         # --- Lógica de Pausa/Resume ---
         if current_obstacle_state and not self.obstacle_paused_drawing:
