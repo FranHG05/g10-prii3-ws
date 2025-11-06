@@ -31,6 +31,8 @@ ros2 launch turtlebot3_gazebo empty_world.launch.py
 
 <h3>4.1) Lanzar el launch que dibuja el 10 y para antes de chocar (Terminal 1) </h3>
 
+Se ha añadido en el launch un cubo para demostrar la parada, para que siga dibujando el 10 debe eliminarse manualmente en el Gazebo.
+
 ```bash
 ros2 launch g10_prii3_move_turtlebot draw_turtlebot.launch.py
 ```
