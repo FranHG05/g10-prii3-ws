@@ -13,6 +13,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
+        (os.path.join('share', package_name, 'worlds', 'maps'), glob('worlds/maps/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -23,7 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'multipose = g10_prii3_nav_jetbot.multipose:main',
+            'autonomous_navigation = g10_prii3_nav_jetbot.autonomous_navigation:main'
         ],
     },
 )

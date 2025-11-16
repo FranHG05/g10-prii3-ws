@@ -1,4 +1,4 @@
-<h2>Sprint 3 — Fase Beta del Sprint</h2>
+<h2>Sprint 3 — Movimiento del JetBot</h2>
 <h3>1) Conectarse al JetBot con su IP (Terminal 1, 2 y 3)</h3>
 
 ```bash
@@ -17,7 +17,46 @@ Contraseña: jetbot
 git clone https://github.com/FranHG05/g10-prii3-ws.git
 ```
 
-<h3>3) Compilar el workspace y cargar el entorno ESTE ES PARA turtlebot(Terminal 1)</h3>
+<h3>3) Compilar el workspace y cargar el entorno (Terminal 1)</h3>
+
+```bash
+cd ~/g10-prii3-ws
+
+colcon build --packages-select g10_prii3_nav_jetbot
+
+source install/setup.bash  
+```
+
+<h3>4) Iniciar el driver del JetBot (Terminal 2)</h3>
+
+Este nodo es el que permite mover físicamente los motores del JetBot y recibir datos del LiDAR.
+```bash
+ros2 run jetbot_pro_ros2 jetbot
+```
+
+<h3>5) Lanzar RViz con el aula F1L3 (Terminal 3)</h3>
+
+```bash
+export TURTLEBOT3_MODEL=burger
+ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True map:=$HOME/g10-prii3-ws/src/g10_prii3_nav_jetbot/worlds/maps/f1l3.yaml
+```
+
+Además se debe de utilizar "2D Pose Estimate" en el punto de reaparición del turtlebot (0,0).
+
+<h3>6) Lanzar el launch que hace una trayectoria por el aula (Terminal 1) </h3>
+
+```bash
+ros2 launch g10_prii3_nav_jetbot autonomous_navigation.launch.py
+```
+
+<h2>Sprint 3 — Simulación con Gazebo</h2>
+<h3>1) Clonar el repositorio (Terminal 1)</h3>
+
+```bash
+git clone https://github.com/FranHG05/g10-prii3-ws.git
+```
+
+<h3>2) Compilar el workspace y cargar el entorno (Terminal 1)</h3>
 
 ```bash
 cd ~/g10-prii3-ws
@@ -27,28 +66,29 @@ colcon build --packages-select g10_prii3_nav_turtlebot
 source install/setup.bash  
 ```
 
-<h3>4) Gazebo turtlebot</h3>
+<h3>3) Lanzar Gazebo con el aula F1L3 (Terminal 2)</h3>
 
 ```bash
 export TURTLEBOT3_MODEL=burger
-
-ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+ros2 launch g10_prii3_nav_turtlebot f1l3_world.launch.py
 ```
 
-<h3>5) Rviz ESTE COMANDO ES PARA turtlebot OJO</h3>
+<h3>3) Lanzar RViz con el aula F1L3 (Terminal 3)</h3>
 
 ```bash
 export TURTLEBOT3_MODEL=burger
-
-ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True map:=/home/marolc/g10-prii3-ws/src/g10_prii3_nav_turtlebot/worlds/map.yaml
+ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True map:=$HOME/g10-prii3-ws/src/g10_prii3_nav_jetbot/worlds/maps/f1l3.yaml
 ```
 
-<h3>6) Iniciar el driver del JetBot (Terminal 2)</h3>
+Además se debe de utilizar "2D Pose Estimate" en el punto de reaparición del turtlebot (0,0).
 
-Este nodo es el que permite mover físicamente los motores del JetBot y recibir datos del LiDAR.
+<h3>5) Lanzar el launch que hace una trayectoria por el aula (Terminal 1) </h3>
+
 ```bash
-ros2 run jetbot_pro_ros2 jetbot
+ros2 launch g10_prii3_nav_turtlebot autonomous_navigation.launch.py
 ```
+
+
 
 <h2>Sprint 2 — Simulación con Gazebo</h2>
 <h3>1) Clonar el repositorio (Terminal 1)</h3>
