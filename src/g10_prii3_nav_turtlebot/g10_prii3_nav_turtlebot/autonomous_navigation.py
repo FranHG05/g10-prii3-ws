@@ -23,7 +23,7 @@ def euler_to_quaternion(roll, pitch, yaw):
 
 class AutoNav(Node):
     def __init__(self):
-        super().__init__('auto_nav_node')
+        super().__init__('autonomous_navigation')
         self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
 
         # Lista de puntos a los que queremos ir (x, y, yaw en radianes)
