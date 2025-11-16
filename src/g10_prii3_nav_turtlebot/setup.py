@@ -1,6 +1,6 @@
-from setuptools import setup
-import os
 from glob import glob
+import os
+from setuptools import setup
 
 package_name = 'g10_prii3_nav_turtlebot'
 
@@ -12,19 +12,21 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'worlds'), glob('worlds/*.world')),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
-        (os.path.join('share', package_name, 'worlds'), glob('worlds/*')),
+        (os.path.join('share', package_name, 'models'), glob('models/**/*', recursive=True)),
+        (os.path.join('share', package_name, 'worlds/maps'), glob('worlds/maps/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='marolc',
-    maintainer_email='molccom@epsa.upv.es',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    maintainer='Marcos',
+    maintainer_email='marcos@example.com',
+    description='TurtleBot3 navigation package with custom world',
+    license='Apache License 2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'multipose = g10_prii3_nav_turtlebot.multipose:main',
+            'auto_nav = g10_prii3_nav_turtlebot.auto_nav:main',
         ],
     },
 )
