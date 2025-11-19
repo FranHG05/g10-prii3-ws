@@ -69,14 +69,14 @@ source install/setup.bash
 <h3>3) Lanzar Gazebo con el aula F1L3 (Terminal 2)</h3>
 
 ```bash
-export TURTLEBOT3_MODEL=burger
+export TURTLEBOT3_MODEL=waffle
 ros2 launch g10_prii3_nav_turtlebot f1l3_world.launch.py
 ```
 
 <h3>3) Lanzar RViz con el aula F1L3 (Terminal 3)</h3>
-
+Para una correcta ejeución, cada usario deberá de cambiar el f1l3_map.yaml introduciendo en la ruta su nombre de usuario.
 ```bash
-export TURTLEBOT3_MODEL=burger
+export TURTLEBOT3_MODEL=waffle
 ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True map:=$HOME/g10-prii3-ws/src/g10_prii3_nav_turtlebot/worlds/maps/f1l3_map.yaml
 ```
 
