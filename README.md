@@ -77,7 +77,7 @@ ros2 launch g10_prii3_nav_turtlebot f1l3_world.launch.py
 
 ```bash
 export TURTLEBOT3_MODEL=burger
-ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True map:=$HOME/g10-prii3-ws/src/g10_prii3_nav_jetbot/worlds/maps/f1l3.yaml
+ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True map:=$HOME/g10-prii3-ws/src/g10_prii3_nav_turtlebot/worlds/maps/f1l3_map.yaml
 ```
 
 Además se debe de utilizar "2D Pose Estimate" en el punto de reaparición del turtlebot (0,0).
