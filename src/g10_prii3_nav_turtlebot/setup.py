@@ -26,7 +26,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'autonomous_navigation = g10_prii3_nav_turtlebot.autonomous_navigation:main'
+            'autonomous_navigation = g10_prii3_nav_turtlebot.autonomous_navigation:main',
         ],
     },
 )
