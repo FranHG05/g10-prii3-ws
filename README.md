@@ -21,9 +21,7 @@ git clone https://github.com/FranHG05/g10-prii3-ws.git
 
 ```bash
 cd ~/g10-prii3-ws
-
 colcon build --packages-select g10_prii3_nav_jetbot
-
 source install/setup.bash  
 ```
 
@@ -35,15 +33,22 @@ ros2 run jetbot_pro_ros2 jetbot
 ```
 
 <h3>5) Lanzar RViz con el aula F1L3 (Terminal 3)</h3>
+Para una correcta ejeución, cada usario deberá de cambiar en el archivo "f1l3.yaml" su usuario en el apartado de "image".
 
 ```bash
-export TURTLEBOT3_MODEL=burger
+gedit g10-prii3-ws/src/g10_prii3_nav_jetbot/worlds/maps/f1l3.yaml
+```
+
+Posteriormente, ejecutar el RViz.
+
+```bash
+export TURTLEBOT3_MODEL=waffle
 ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True map:=$HOME/g10-prii3-ws/src/g10_prii3_nav_jetbot/worlds/maps/f1l3.yaml
 ```
 
 Además se debe de utilizar "2D Pose Estimate" en el punto de reaparición del turtlebot (0,0).
 
-<h3>6) Lanzar el launch que hace una trayectoria por el aula (Terminal 1) </h3>
+<h3>6) Lanzar el launch que hace una trayectoria por el aula dependiendo de qué ArUco escanee (Terminal 1) </h3>
 
 ```bash
 ros2 launch g10_prii3_nav_jetbot autonomous_navigation.launch.py
@@ -56,42 +61,51 @@ ros2 launch g10_prii3_nav_jetbot autonomous_navigation.launch.py
 git clone https://github.com/FranHG05/g10-prii3-ws.git
 ```
 
-<h3>2) Compilar el workspace y cargar el entorno (Terminal 1)</h3>
+<h3>2) Descomprimir los tres ArUcos para la simulación (Terminal 1)</h3>
+
+```bash
+cd ~/g10-prii3-ws/ArUco/
+unzip arucos_gazebo.zip -d ~/.gazebo/models/
+```
+
+<h3>3) Compilar el workspace y cargar el entorno (Terminal 1)</h3>
 
 ```bash
 cd ~/g10-prii3-ws
-
 colcon build --packages-select g10_prii3_nav_turtlebot
-
 source install/setup.bash  
 ```
 
-<h3>3) Lanzar Gazebo con el aula F1L3 (Terminal 2)</h3>
+<h3>4) Lanzar Gazebo con el aula F1L3 (Terminal 2)</h3>
 
 ```bash
+cd ~/g10-prii3-ws
 source install/setup.bash 
 export TURTLEBOT3_MODEL=waffle
 ros2 launch g10_prii3_nav_turtlebot f1l3_world.launch.py
 ```
 
-<h3>3) Lanzar RViz con el aula F1L3 (Terminal 3)</h3>
-Para una correcta ejeución, cada usario deberá de cambiar el "f1l3_map.yaml" introduciendo en la ruta su nombre de usuario.
+<h3>5) Lanzar RViz con el aula F1L3 (Terminal 3)</h3>
+Para una correcta ejeución, cada usario deberá de cambiar en el archivo "f1l3_map.yaml" su usuario en el apartado de "image".
 
 ```bash
-source install/setup.bash 
+gedit g10-prii3-ws/src/g10_prii3_nav_turtlebot/worlds/maps/f1l3_map.yaml
+```
+
+Posteriormente, ejecutar el RViz.
+
+```bash
 export TURTLEBOT3_MODEL=waffle
 ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True map:=$HOME/g10-prii3-ws/src/g10_prii3_nav_turtlebot/worlds/maps/f1l3_map.yaml
 ```
 
 Además se debe de utilizar "2D Pose Estimate" en el punto de reaparición del turtlebot (0,0).
 
-<h3>5) Lanzar el launch que hace una trayectoria por el aula (Terminal 1) </h3>
+<h3>6) Lanzar el launch que hace una trayectoria por el aula dependiendo del ArUco ubicado en la puerta (Terminal 1) </h3>
 
 ```bash
 ros2 launch g10_prii3_nav_turtlebot autonomous_navigation.launch.py
 ```
-
-
 
 <h2>Sprint 2 — Simulación con Gazebo</h2>
 <h3>1) Clonar el repositorio (Terminal 1)</h3>
